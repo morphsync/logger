@@ -1,0 +1,15 @@
+{
+  "name": "@morphsync/logger",
+  "version": "1.0.0",
+  "description": "Logger utility for Morphsync applications",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": ["logger", "morphsync", "logging"],
+  "author": "Morphsync",
+  "license": "ISC",
+  "dependencies": {
+    "node-cron": "^3.0.3"
+  }
+}
