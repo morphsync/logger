@@ -1,13 +1,17 @@
 {
   "name": "@morphsync/logger",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Logger utility for Morphsync applications",
   "main": "index.js",
   "readme": "README.md",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": ["logger", "morphsync", "logging"],
+  "keywords": [
+    "logger",
+    "morphsync",
+    "logging"
+  ],
   "author": "Morphsync",
   "license": "ISC",
   "repository": {
