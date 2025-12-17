@@ -8,9 +8,12 @@ const path = require('path');
  */
 class Logger {
     constructor() {
-        this.rootDir = process.env.LOG_DIR 
-            ? path.resolve(process.cwd(), process.env.LOG_DIR)
-            : path.resolve(process.cwd(), 'log');
+        this.rootDir = path.resolve(process.cwd(), 'log');
+        
+        // Ensure root log directory exists
+        if (!fs.existsSync(this.rootDir)) {
+            fs.mkdirSync(this.rootDir, { recursive: true });
+        }
     }
 
     /**
@@ -27,8 +30,12 @@ class Logger {
         const month = String(now.getMonth() + 1).padStart(2, '0');
         const date = String(now.getDate()).padStart(2, '0');
 
-        const logDir = path.join(this.rootDir, year, month, date, path.dirname(fileLocation)); // Create directory structure
-        const logFile = path.join(logDir, `${path.basename(fileLocation)}.log`); // Get the full log file path
+        const dirName = path.dirname(fileLocation);
+        const basePath = dirName === '.' ? '' : dirName;
+        const logDir = basePath 
+            ? path.join(this.rootDir, year, month, date, basePath)
+            : path.join(this.rootDir, year, month, date);
+        const logFile = path.join(logDir, `${path.basename(fileLocation)}.log`);
 
         // Ensure the directory exists
         if (!fs.existsSync(logDir)) {
