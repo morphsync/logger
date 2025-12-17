@@ -8,7 +8,9 @@ const path = require('path');
  */
 class Logger {
     constructor() {
-        this.rootDir = path.resolve(__dirname, process.env.LOG_DIR || '../../log');
+        this.rootDir = process.env.LOG_DIR 
+            ? path.resolve(process.cwd(), process.env.LOG_DIR)
+            : path.resolve(process.cwd(), 'log');
     }
 
     /**
