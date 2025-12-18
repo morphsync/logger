@@ -7,12 +7,31 @@ const path = require('path');
  * @author Jay Chauhan
  */
 class Logger {
-    constructor() {
-        this.rootDir = path.resolve(process.cwd(), 'log');
+    /**
+     * @constructor
+     * @param {string|Object} options - Default file location (string) or configuration options (object)
+     * @param {string} options.logDir - Custom log directory path (relative or absolute)
+     */
+    constructor(options) {
+        // Handle string parameter as default file location
+        if (typeof options === 'string') {
+            this.defaultFileLocation = options;
+            this.rootDir = path.resolve(process.cwd(), 'log');
+        } else {
+            // Handle object parameter or no parameter
+            const opts = options || {};
+            this.defaultFileLocation = null;
+            const logPath = opts.logDir || 'log';
+            this.rootDir = path.isAbsolute(logPath) ? logPath : path.resolve(process.cwd(), logPath);
+        }
         
-        // Ensure root log directory exists
+        // Check if log directory already exists, if not create it
         if (!fs.existsSync(this.rootDir)) {
-            fs.mkdirSync(this.rootDir, { recursive: true });
+            try {
+                fs.mkdirSync(this.rootDir, { recursive: true });
+            } catch (err) {
+                console.error(`Error creating log directory ${this.rootDir}:`, err);
+            }
         }
     }
 
@@ -30,12 +49,15 @@ class Logger {
         const month = String(now.getMonth() + 1).padStart(2, '0');
         const date = String(now.getDate()).padStart(2, '0');
 
-        const dirName = path.dirname(fileLocation);
+        // Use provided fileLocation or default to 'default/default' or constructor default
+        const finalLocation = fileLocation || this.defaultFileLocation || 'default/default';
+
+        const dirName = path.dirname(finalLocation);
         const basePath = dirName === '.' ? '' : dirName;
         const logDir = basePath 
             ? path.join(this.rootDir, year, month, date, basePath)
             : path.join(this.rootDir, year, month, date);
-        const logFile = path.join(logDir, `${path.basename(fileLocation)}.log`);
+        const logFile = path.join(logDir, `${path.basename(finalLocation)}.log`);
 
         // Ensure the directory exists
         if (!fs.existsSync(logDir)) {

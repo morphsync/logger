@@ -25,16 +25,21 @@ npm install @morphsync/logger
 ```javascript
 const Logger = require('@morphsync/logger');
 
-const logger = new Logger();
+// CASE 1: With default file location
+const logger = new Logger('folder/file');
+logger.write('Message to be write in log file');
+// => log/2025/01/15/folder/file.log
 
-// Log a simple message
-logger.write('Application started', 'app/info');
+logger.write('Message to be write in log file specified file', 'folder-1/file-1');
+// => log/2025/01/15/folder-1/file-1.log
 
-// Log an object
-logger.write({ userId: 123, action: 'login' }, 'auth/activity');
+// CASE 2: Without default file location
+const logger2 = new Logger();
+logger2.write('Message to be write in log file');
+// => log/2025/01/15/default/default.log
 
-// Log errors
-logger.write('Database connection failed', 'database/error');
+logger2.write('Message with specific location', 'app/info');
+// => log/2025/01/15/app/info.log
 ```
 
 ## Usage
@@ -60,18 +65,40 @@ logger.write({
 }, 'transactions/log');
 ```
 
+### Default File Location
+
+```javascript
+const Logger = require('@morphsync/logger');
+
+// Set default file location in constructor
+const logger = new Logger('errors/critical');
+
+// Write without specifying location (uses default)
+logger.write('Error occurred');
+// => log/2025/01/15/errors/critical.log
+
+// Override default location for specific log
+logger.write('Info message', 'info/general');
+// => log/2025/01/15/info/general.log
+```
+
 ### Custom Log Directory
 
 ```javascript
 const Logger = require('@morphsync/logger');
 
-// Default: './log'
+// Default: './log' in project root
 const logger1 = new Logger();
 
-// Custom directory
-const logger2 = new Logger('./logs');
-const logger3 = new Logger('/var/log/myapp');
-const logger4 = new Logger('C:\\logs\\myapp'); // Windows
+// Custom relative directory
+const logger2 = new Logger({ logDir: './logs' });
+const logger3 = new Logger({ logDir: '../../log' });
+
+// Custom absolute directory
+const logger4 = new Logger({ logDir: '/var/log/myapp' });
+const logger5 = new Logger({ logDir: 'C:\\logs\\myapp' }); // Windows
+
+// If directory exists, it will be used; otherwise, it will be created
 ```
 
 ### Express.js Integration
@@ -173,16 +200,31 @@ cron.schedule('0 0 * * *', () => {
 
 ### Constructor
 
-#### `new Logger(logDir)`
+#### `new Logger(options)`
 
 Creates a new Logger instance.
 
 **Parameters:**
-- `logDir` (string, optional): Custom log directory path. Default: `'./log'`
+- `options` (string | object, optional): Default file location (string) or configuration options (object)
+  - If string: Sets default file location (e.g., `'folder/file'`)
+  - If object:
+    - `logDir` (string, optional): Custom log directory path (relative or absolute). Default: `'log'`
+  - If not provided: Uses `'default/default'` as default file location
 
-**Example:**
+**Examples:**
 ```javascript
-const logger = new Logger('./logs');
+// No parameter - uses 'default/default' when fileLocation not provided
+const logger = new Logger();
+logger.write('Message'); // => log/2025/01/15/default/default.log
+
+// String parameter - sets default file location
+const logger = new Logger('app/error');
+logger.write('Message'); // => log/2025/01/15/app/error.log
+logger.write('Message', 'custom/file'); // => log/2025/01/15/custom/file.log
+
+// Object parameter - custom log directory
+const logger = new Logger({ logDir: './logs' });
+const logger = new Logger({ logDir: '/var/log/myapp' });
 ```
 
 ### Methods
@@ -193,14 +235,25 @@ Writes a log entry to the specified file.
 
 **Parameters:**
 - `details` (string | object): The log message or object to log
-- `fileLocation` (string): The file path within the date folder (format: `category/filename`)
+- `fileLocation` (string, optional): The file path within the date folder (format: `category/filename`)
+  - If not provided, uses the default file location from constructor
+  - If no default was set, uses `'default/default'`
 
 **Returns:** void
 
-**Example:**
+**Examples:**
 ```javascript
+// With file location specified
 logger.write('User logged in', 'auth/info');
 logger.write({ userId: 123 }, 'users/activity');
+
+// Without file location (uses default)
+const logger = new Logger('app/error');
+logger.write('Error occurred'); // => log/2025/01/15/app/error.log
+
+// Without file location and no default
+const logger2 = new Logger();
+logger2.write('Message'); // => log/2025/01/15/default/default.log
 ```
 
 **Log File Path:**
